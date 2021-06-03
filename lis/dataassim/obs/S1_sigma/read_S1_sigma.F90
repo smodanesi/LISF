@@ -387,8 +387,9 @@ subroutine read_S1_sigma_data(n, k, fname, svv_ip, svh_ip)
            if(s_vv(i,j).ge.-999.and.&
                 stn_col.gt.0.and.stn_col.le.LIS_rc%obs_lnc(k).and.&
                 stn_row.gt.0.and.stn_row.le.LIS_rc%obs_lnr(k)) then
-              svv_ip(stn_col,stn_row) = svv_ip(stn_col,stn_row) + s_vv(i,j)
-              svh_ip(stn_col,stn_row) = svh_ip(stn_col,stn_row) + s_vh(i,j)
+              ! add in linear scale for later averaging
+                svv_ip(stn_col,stn_row) = svv_ip(stn_col,stn_row) + 10.**(s_vv(i,j))/10.
+              svh_ip(stn_col,stn_row) = svh_ip(stn_col,stn_row) + 10.**(s_vh(i,j))/10.
               ns_ip(stn_col,stn_row) = ns_ip(stn_col,stn_row) + 1
            endif
         enddo
@@ -397,7 +398,8 @@ subroutine read_S1_sigma_data(n, k, fname, svv_ip, svh_ip)
      do r=1,LIS_rc%obs_lnr(k)
         do c=1,LIS_rc%obs_lnc(k)
            if(ns_ip(c,r).ne.0) then
-              svv_ip(c,r) = svv_ip(c,r)/ns_ip(c,r) !average of dB, first convert to linear?
+              ! average in linear scale
+              svv_ip(c,r) = svv_ip(c,r)/ns_ip(c,r)
               svh_ip(c,r) = svh_ip(c,r)/ns_ip(c,r)
            else
               svv_ip(c,r) = LIS_rc%udef
@@ -450,6 +452,9 @@ subroutine read_S1_sigma_data(n, k, fname, svv_ip, svh_ip)
            if(svv_ip(c,r).eq.LIS_rc%udef.and.ns_ip(c,r).gt.0) then
               svv_ip(c,r) = svv_fill(c,r)/ns_ip(c,r) 
               svh_ip(c,r) = svh_fill(c,r)/ns_ip(c,r) 
+              ! back to log scale, dB
+              svv_ip(c,r) = 10.*LOG10(svv_ip(c,r));
+              svh_ip(c,r) = 10.*LOG10(svh_ip(c,r));
            endif
         enddo
      enddo
