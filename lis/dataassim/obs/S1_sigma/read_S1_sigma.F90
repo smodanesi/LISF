@@ -385,11 +385,11 @@ subroutine read_S1_sigma_data(n, k, fname, svv_ip, svh_ip)
            stn_row = nint(row)
 
            if(s_vv(i,j).ge.-999.and.&
-                stn_col.gt.0.and.stn_col.le.LIS_rc%obs_lnc(k).and.&
-                stn_row.gt.0.and.stn_row.le.LIS_rc%obs_lnr(k)) then
+              stn_col.gt.0.and.stn_col.le.LIS_rc%obs_lnc(k).and.&
+              stn_row.gt.0.and.stn_row.le.LIS_rc%obs_lnr(k)) then
               ! add in linear scale for later averaging
-                svv_ip(stn_col,stn_row) = svv_ip(stn_col,stn_row) + 10.**(s_vv(i,j))/10.
-              svh_ip(stn_col,stn_row) = svh_ip(stn_col,stn_row) + 10.**(s_vh(i,j))/10.
+              svv_ip(stn_col,stn_row) = svv_ip(stn_col,stn_row) + 10.**(s_vv(i,j)/10.)
+              svh_ip(stn_col,stn_row) = svh_ip(stn_col,stn_row) + 10.**(s_vh(i,j)/10.)
               ns_ip(stn_col,stn_row) = ns_ip(stn_col,stn_row) + 1
            endif
         enddo
