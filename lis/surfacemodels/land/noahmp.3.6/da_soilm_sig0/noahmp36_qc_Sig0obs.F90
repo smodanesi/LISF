@@ -254,8 +254,8 @@ subroutine noahmp36_qc_Sig0obs(n,k,OBS_State)
            s_vv(t) = LIS_rc%udef 
         elseif(t1_obs(t).le.LIS_CONST_TKFRZ) then ! Var name Noah36 --> t1
            s_vv(t) = LIS_rc%udef
-        elseif(vegt_obs(t).le.4) then !forest types ! Var name Noah36 --> vegt
-           s_vv(t) = LIS_rc%udef
+ !       elseif(vegt_obs(t).le.4) then !forest types ! Var name Noah36 --> vegt
+ !          s_vv(t) = LIS_rc%udef
  ! MN: check for snow  
         elseif(sneqv_obs(t).gt.0.001) then 
            s_vv(t) = LIS_rc%udef
