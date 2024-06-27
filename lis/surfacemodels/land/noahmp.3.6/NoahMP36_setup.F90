@@ -19,7 +19,7 @@
 !  specification of the subroutine is defined by Sujay Kumar. 
 !   9/4/14: Shugong Wang; initial implementation for LIS 7 and NoahMP36
 !   2/7/18: Soni Yatheendradas; code added for OPTUE to work 
-!
+!   27/06/2024: Sara Modanesi; added specification for [IRRTHRESH_DATA] params
 ! !INTERFACE:
 subroutine NoahMP36_setup()
 ! !USES:
@@ -31,7 +31,7 @@ subroutine NoahMP36_setup()
     use MODULE_SF_NOAHMPLSM_36, only: read_mp_veg_parameters, &
            SLCATS, LUCATS, CSOIL_DATA, BB, SATDK, SATDW, &
            SATPSI, QTZ, MAXSMC, REFSMC, WLTSMC, &
-           CZIL_DATA, FRZK_DATA, REFDK_DATA, REFKDT_DATA, SLOPE_DATA, &
+           CZIL_DATA, IRRTHRESH_DATA, FRZK_DATA, REFDK_DATA, REFKDT_DATA, SLOPE_DATA, &
            TOPT_DATA, RGLTBL, RSMAX_DATA, RSTBL, HSTBL, NROTBL, &
            CH2OP, DLEAF, Z0MVT, HVT, HVB, RC, RHOL, RHOS, TAUL, TAUS, &
            XL, CWPVT, C3PSN, KC25, AKC, KO25, AKO, AVCMX, AQE, &         
@@ -186,7 +186,8 @@ subroutine NoahMP36_setup()
                                   NOAHMP36_struc(n)%soil_tbl_name,      &
                                   NOAHMP36_struc(n)%gen_tbl_name,       &
                                   NOAHMP36_struc(n)%landuse_scheme_name,& 
-                                  NOAHMP36_struc(n)%soil_scheme_name)
+                                  NOAHMP36_struc(n)%soil_scheme_name, &
+                                  NOAHMP36_struc(n)%irr_tbl_name) !SM
         ! SY: Begin for enabling OPTUE 
         do t = 1, LIS_rc%npatch(n, mtype)
             
@@ -218,6 +219,10 @@ subroutine NoahMP36_setup()
             ! SY: Begin SOIL PARAMETER CONSTRAINT
             NOAHMP36_struc(n)%noahmp36(t)%smcdry = DRYSMC(NOAHMP36_struc(n)%noahmp36(t)%soiltype)
             ! SY: End SOIL PARAMETER CONSTRAINT
+
+            ! SM: Start IRRTHRESH PARAMETER
+            NOAHMP36_struc(n)%noahmp36(t)%irrthresh = IRRTHRESH_DATA
+            ! SM: End IRRTHRESH PARAMETER
 
             ! SY: Begin UNIVERSAL PARAMETERS
             NOAHMP36_struc(n)%noahmp36(t)%czil = CZIL_DATA
