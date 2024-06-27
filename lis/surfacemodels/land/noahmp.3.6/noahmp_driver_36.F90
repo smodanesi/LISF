@@ -10,7 +10,7 @@
 #define LIS_NoahMP_TEST 0
 ! !INTERFACE
 subroutine noahmp_driver_36(iloc, jloc, &
-     landuse_tbl_name, soil_tbl_name,  gen_tbl_name,             & 
+     landuse_tbl_name, soil_tbl_name,  gen_tbl_name, irr_tbl_name,            &    !SM 27/06/2024 calibratable parameters
                             noahmp_tbl_name, landuse_scheme_name, soil_scheme_name,     &
                             dveg_opt, crs_opt, btr_opt, run_opt, sfc_opt, frz_opt,      &
                             inf_opt, rad_opt, alb_opt , snf_opt, tbot_opt, stc_opt,     &
@@ -26,7 +26,7 @@ subroutine noahmp_driver_36(iloc, jloc, &
                             tbot    , pblh    , zlvl    ,                               & ! in : forcing
                             p_csoil , p_bexp  , p_dksat , p_dwsat , p_psisat,           & ! SY: in : calibratable parameters for enabling OPTUE
                             p_quartz, p_smcmax, p_smcref, p_smcwlt,                     & ! SY: in : calibratable parameters for enabling OPTUE
-                            p_czil  , p_frzk  , p_refdk , p_refkdt, p_slope ,          & ! SY: in : calibratable parameters for enabling OPTUE
+                            p_czil  , p_irrthresh, p_frzk  , p_refdk , p_refkdt, p_slope ,          & ! SY: in : calibratable parameters for enabling OPTUE
                             p_topt  , p_rgl   , p_rsmax , p_rsmin , p_hs, p_nroot,     & ! SY: in : calibratable parameters for enabling OPTUE
                             p_CH2OP , p_DLEAF , p_Z0MVT , p_HVT   , p_HVB   ,          & ! SY: in : calibratable parameters for enabling OPTUE
                             p_RC    , p_RHOL1 , p_RHOL2 , p_RHOS1 , p_RHOS2 ,          & ! SY: in : calibratable parameters for enabling OPTUE
@@ -43,7 +43,7 @@ subroutine noahmp_driver_36(iloc, jloc, &
                             isnow   , zss     , snowh   , sneqv   , snowice , snowliq , & ! in/out : 
                             zwt     , wa      , wt      , wslake  , lfmass  , rtmass  , & ! in/out : 
                             stmass  , wood    , stblcp  , fastcp  , lai     , sai     , & ! in/out : 
-                            cm      , ch      , tauss   ,                               & ! in/out : 
+                            irr     , cm      , ch      , tauss   ,                          & ! in/out : !SM
                             smcwtd  ,deeprech , rech    ,                               & ! in/out :
                             fsa     , fsr     , fira    , fsh     , ssoil   , fcev    , & ! out : 
                             fgev    , fctr    , ecan    , etran   , edir    , trad    , & ! out :
@@ -67,7 +67,7 @@ subroutine noahmp_driver_36(iloc, jloc, &
                                opt_alb , opt_snf , opt_tbot, opt_stc,   & ! SY
                                CSOIL_DATA, BB, SATDK, SATDW, & ! SY
                                SATPSI, QTZ, MAXSMC, REFSMC, WLTSMC, & ! SY
-                               CZIL_DATA, FRZK_DATA, REFDK_DATA, REFKDT_DATA, SLOPE_DATA, & ! SY
+                               CZIL_DATA, IRRTHRESH_DATA, FRZK_DATA, REFDK_DATA, REFKDT_DATA, SLOPE_DATA, & ! SY
                                TOPT_DATA, RGLTBL, RSMAX_DATA, RSTBL, HSTBL, NROTBL, & ! SY
                                CH2OP, DLEAF, Z0MVT, HVT, HVB, RC, RHOL, RHOS, TAUL, TAUS, & ! SY
                                XL, CWPVT, C3PSN, KC25, AKC, KO25, AKO, AVCMX, AQE, & ! SY
@@ -79,6 +79,7 @@ subroutine noahmp_driver_36(iloc, jloc, &
   character(len=256), intent(in) :: landuse_tbl_name      ! Noah model landuse parameter table
   character(len=256), intent(in) :: soil_tbl_name         ! Noah model soil parameter table
   character(len=256), intent(in) :: gen_tbl_name          ! Noah model general parameter table
+  character(len=256), intent(in) :: irr_tbl_name          ! Noah model irrigation parameter table !SM
   character(len=256), intent(in) :: noahmp_tbl_name       ! NoahMP parameter table
   character(len=256), intent(in) :: landuse_scheme_name   ! Landuse classficiation scheme
   character(len=256), intent(in) :: soil_scheme_name      ! Soil classification scheme  
@@ -145,6 +146,7 @@ subroutine noahmp_driver_36(iloc, jloc, &
   real,    intent(in) :: p_smcref               ! reference soil moisture (field capacity)
   real,    intent(in) :: p_smcwlt               ! wilting point soil moisture (volumetric)
   real,    intent(in) :: p_czil                 ! Calculate roughness length of heat
+  real,    intent(in) :: p_irrthresh            ! Irrigation threshold parameter !SM
   real,    intent(in) :: p_frzk                 ! frozen ground parameter
   real,    intent(in) :: p_refdk                ! parameters in the surface runoff parameteriz.
   real,    intent(in) :: p_refkdt               ! parameters in the surface runoff parameteriz.
@@ -228,7 +230,8 @@ subroutine noahmp_driver_36(iloc, jloc, &
   real, intent(inout) :: stblcp               ! stable carbon in deep soil [g/m2]
   real, intent(inout) :: fastcp               ! short-lived carbon in shallow soil [g/m2] 
   real, intent(inout) :: lai                  ! leaf area index [-]
-  real, intent(inout) :: sai                  ! stem area index [-] 
+  real, intent(inout) :: sai                  ! stem area index [-]
+  real, intent(inout) :: irr                  ! irrigation [kg m-2 s-1] in NoahMP struc !SM
   real, intent(inout) :: cm                   ! momentum drag coefficient [s/m] 
   real, intent(inout) :: ch                   ! sensible heat exchange coefficient [s/m] 
   real, intent(inout) :: tauss                ! snow aging term [-] 
@@ -349,7 +352,8 @@ subroutine noahmp_driver_36(iloc, jloc, &
 #if(LIS_NoahMP_TEST)
   write(*,*) " Noah model landuse parameter table: ",  landuse_tbl_name    
   write(*,*) " Noah model soil parameter table: ",     soil_tbl_name       
-  write(*,*) " Noah model general parameter table: ",  gen_tbl_name        
+  write(*,*) " Noah model general parameter table: ",  gen_tbl_name
+  write(*,*) " Noah model irrigation parameter table: ",  irr_tbl_name
   write(*,*) " NoahMP parameter table: ",              noahmp_tbl_name     
   write(*,*) " Landuse classficiation scheme: ",       landuse_scheme_name 
   write(*,*) " Soil classification scheme: ",          soil_scheme_name    
@@ -467,6 +471,7 @@ subroutine noahmp_driver_36(iloc, jloc, &
   ! SY: End SOIL PARAMETERS
   ! SY: Begin UNIVERSAL PARAMETERS
   CZIL_DATA = p_czil
+  IRRTHRESH_DATA=p_irrthresh !SM
   FRZK_DATA = p_frzk
   REFDK_DATA = p_refdk
   REFKDT_DATA = p_refkdt
