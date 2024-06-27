@@ -20,7 +20,8 @@
 !
 !   9/4/14: Shugong Wang; initial implementation for NoahMP36 with LIS-7
 !   2/7/18: Soni Yatheendradas; code added for OPTUE to work
-!
+!   27/06/2024: Sara Modanesi; added specification for IRRPARM.TBL to read 
+!   irrigation parameter and added irrigation variable into the NoahMP struc.
 ! !INTERFACE:
 subroutine NoahMP36_main(n)
 ! !USES:
@@ -63,6 +64,7 @@ subroutine NoahMP36_main(n)
     character(len=256)   :: tmp_landuse_tbl_name   ! Noah model landuse parameter table [-]
     character(len=256)   :: tmp_soil_tbl_name      ! Noah model soil parameter table [-]
     character(len=256)   :: tmp_gen_tbl_name       ! Noah model general parameter table [-]
+    character(len=256)   :: tmp_irr_tbl_name       ! Noah model irrigation parameter table [-] !SM
     character(len=256)   :: tmp_noahmp_tbl_name    ! NoahMP parameter table [-]
     character(len=256)   :: tmp_landuse_scheme_name ! landuse classification scheme [-]
     character(len=256)   :: tmp_soil_scheme_name   ! soil classification scheme [-]
@@ -148,6 +150,7 @@ subroutine NoahMP36_main(n)
     real                 :: tmp_fastcp             ! short-lived carbon in shallow soil [g/m2]
     real                 :: tmp_lai                ! leaf area index [-]
     real                 :: tmp_sai                ! stem area index [-]
+    real                 :: tmp_irr                ! irrigation water [kg m-2 s-1] !SM
     real                 :: tmp_cm                 ! momentum drag coefficient [m s-1]
     real                 :: tmp_ch                 ! sensible heat exchange coefficient [m s-1]
     real                 :: tmp_tauss              ! snow aging term [-]
@@ -231,6 +234,9 @@ subroutine NoahMP36_main(n)
     real                 :: tmp_smcref         ! reference soil moisture (field capacity) 
     real                 :: tmp_smcwlt         ! wilting point soil moisture (volumetric) 
     ! SY: End SOIL PARAMETERS 
+    ! SM: Begin IRR PARAMETERS
+    real                 :: tmp_irrthresh           ! Irrigation threshold [-] !SM
+    !SM: End IRR PARAMETERS
     ! SY: Begin UNIVERSAL PARAMETERS
     real                 :: tmp_czil           ! Calculate roughness length of heat 
     real                 :: tmp_frzk           ! frozen ground parameter 
@@ -460,6 +466,7 @@ subroutine NoahMP36_main(n)
             tmp_landuse_tbl_name                    = NOAHMP36_struc(n)%landuse_tbl_name
             tmp_soil_tbl_name                       = NOAHMP36_struc(n)%soil_tbl_name
             tmp_gen_tbl_name                        = NOAHMP36_struc(n)%gen_tbl_name
+            tmp_irr_tbl_name                        = NOAHMP36_struc(n)%irr_tbl_name !SM
             tmp_noahmp_tbl_name                     = NOAHMP36_struc(n)%noahmp_tbl_name
             tmp_landuse_scheme_name                 = NOAHMP36_struc(n)%landuse_scheme_name
             tmp_soil_scheme_name                    = NOAHMP36_struc(n)%soil_scheme_name
@@ -528,6 +535,7 @@ subroutine NoahMP36_main(n)
             tmp_fastcp      = NOAHMP36_struc(n)%noahmp36(t)%fastcp
             tmp_lai         = NOAHMP36_struc(n)%noahmp36(t)%lai
             tmp_sai         = NOAHMP36_struc(n)%noahmp36(t)%sai
+            tmp_irr         = NOAHMP36_struc(n)%noahmp36(t)%irr !SM
             tmp_cm          = NOAHMP36_struc(n)%noahmp36(t)%cm
             tmp_ch          = NOAHMP36_struc(n)%noahmp36(t)%ch
             tmp_tauss       = NOAHMP36_struc(n)%noahmp36(t)%tauss
@@ -564,6 +572,9 @@ subroutine NoahMP36_main(n)
             tmp_hs          = NOAHMP36_struc(n)%noahmp36(t)%hs
             tmp_nroot       = NOAHMP36_struc(n)%noahmp36(t)%nroot
             ! SY: End corresponding to REDPRM
+            ! SM: Begin corresponding to IRRPARM
+            tmp_irrthresh   = NOAHMP36_struc(n)%noahmp36(t)%irrthresh !SM26092022
+            ! SM: End corresponding to IRRPARM
             ! SY: Begin corresponding to read_mp_veg_parameters
             tmp_CH2OP       = NOAHMP36_struc(n)%noahmp36(t)%CH2OP
             tmp_DLEAF       = NOAHMP36_struc(n)%noahmp36(t)%DLEAF
@@ -615,6 +626,7 @@ subroutine NoahMP36_main(n)
             call noahmp_driver_36(LIS_localPet, t,tmp_landuse_tbl_name  , & ! in    - Noah model landuse parameter table [-]
                                   tmp_soil_tbl_name     , & ! in    - Noah model soil parameter table [-]
                                   tmp_gen_tbl_name      , & ! in    - Noah model general parameter table [-]
+                                  tmp_irr_tbl_name      , & ! in    - Noah model irrigation parameter table [-] !SM
                                   tmp_noahmp_tbl_name   , & ! in    - NoahMP parameter table [-]
                                   tmp_landuse_scheme_name, & ! in    - landuse classification scheme [-]
                                   tmp_soil_scheme_name  , & ! in    - soil classification scheme [-]
@@ -678,6 +690,7 @@ subroutine NoahMP36_main(n)
                                   tmp_smcref            , & ! in    - reference soil moisture (field capacity) 
                                   tmp_smcwlt            , & ! in    - wilting point soil moisture (volumetric) 
                                   tmp_czil              , & ! in    - Calculate roughness length of heat 
+                                  tmp_irrthresh         , & ! in    - Irrigation threshold !SM
                                   tmp_frzk              , & ! in    - frozen ground parameter 
                                   tmp_refdk             , & ! in    - parameters in the surface runoff parameteriz.
                                   tmp_refkdt            , & ! in    - parameters in the surface runoff parameteriz. 
@@ -761,6 +774,7 @@ subroutine NoahMP36_main(n)
                                   tmp_fastcp            , & ! inout - short-lived carbon in shallow soil [g/m2]
                                   tmp_lai               , & ! inout - leaf area index [-]
                                   tmp_sai               , & ! inout - stem area index [-]
+                                  tmp_irr               , & ! inout - irrigation water [kg m-2 s-1] !SM
                                   tmp_cm                , & ! inout - momentum drag coefficient [m s-1]
                                   tmp_ch                , & ! inout - sensible heat exchange coefficient [m s-1]
                                   tmp_tauss             , & ! inout - snow aging term [-]
@@ -870,6 +884,7 @@ subroutine NoahMP36_main(n)
             NOAHMP36_struc(n)%noahmp36(t)%fastcp      = tmp_fastcp
             NOAHMP36_struc(n)%noahmp36(t)%lai         = tmp_lai
             NOAHMP36_struc(n)%noahmp36(t)%sai         = tmp_sai
+            NOAHMP36_struc(n)%noahmp36(t)%irr         = tmp_irr !SM
             NOAHMP36_struc(n)%noahmp36(t)%cm          = tmp_cm
             NOAHMP36_struc(n)%noahmp36(t)%ch          = tmp_ch
             NOAHMP36_struc(n)%noahmp36(t)%tauss       = tmp_tauss
