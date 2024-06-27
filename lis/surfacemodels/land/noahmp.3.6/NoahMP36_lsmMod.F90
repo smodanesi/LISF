@@ -117,7 +117,8 @@ module NoahMP36_lsmMod
 !  by Shugong Wang for the NASA Land Information System Version 7. The initial 
 !  specification of the module is defined by Sujay Kumar. 
 !  9/4/14: Shugong Wang Initial implementation for LIS 7 and NoahMP36
-!
+!  27/06/2024: Sara Modanesi; specification for: irrigation threshold tbl table; 
+!  Timewidow to cumulate irrigation; allocate space to compute cumulated values of irrigation
 ! !USES:
     use NoahMP36_module
     use LIS_constantsMod, only : LIS_CONST_PATH_LEN
@@ -202,6 +203,7 @@ module NoahMP36_lsmMod
         character(len=256) :: landuse_tbl_name
         character(len=256) :: soil_tbl_name
         character(len=256) :: gen_tbl_name
+        character(len=256) :: irr_tbl_name !SM
         character(len=256) :: noahmp_tbl_name
         character(len=256) :: landuse_scheme_name
         character(len=256) :: soil_scheme_name
@@ -230,6 +232,10 @@ module NoahMP36_lsmMod
         integer            :: sc_idx
         integer            :: iz0tlnd
         !real               :: zlvl
+        !-----------------------------------------------------------------------------------
+        ! SM 27/06/2024 : add time window to cumulate irrigation data in /pe/obspred/SYNTirr
+        !-----------------------------------------------------------------------------------
+        integer            :: Tcal_windowsize
         type(NoahMP36dec), pointer :: noahmp36(:)
     end type NoahMP36_type_dec
 
@@ -292,6 +298,11 @@ contains
                 allocate(NOAHMP36_struc(n)%noahmp36(t)%zss( NOAHMP36_struc(n)%nsoil + NOAHMP36_struc(n)%nsnow))
                 allocate(NOAHMP36_struc(n)%noahmp36(t)%snowice(NOAHMP36_struc(n)%nsnow))
                 allocate(NOAHMP36_struc(n)%noahmp36(t)%snowliq(NOAHMP36_struc(n)%nsnow))
+            enddo
+
+            !SM allocate memory to cumulate irrigation data based on Time_window in /pe/obspred/SYNTirr
+            do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+                allocate(NOAHMP36_struc(n)%noahmp36(t)%IRR_ac_antecedent(NOAHMP36_struc(n)%Tcal_windowsize))
             enddo
 !            ! allocate memory for intiali state variables
 !            allocate(NOAHMP36_struc(n)%init_stc( NOAHMP36_struc(n)%nsoil))
