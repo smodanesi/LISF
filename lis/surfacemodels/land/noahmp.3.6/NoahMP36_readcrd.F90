@@ -17,7 +17,8 @@
 !  by Shugong Wang for the NASA Land Information System Version 7. The initial 
 !  specification of the subroutine is defined by Sujay Kumar. 
 !   9/4/14 : Shugong Wang, initial implementation for LIS 7 and NoahMP36
-!
+!  27/06/2024: Sara Modanesi, added spec. to read the irrigation threshold table
+!  and the Time window used to cumulate the irr obspred for calibration
 ! !INTERFACE:
 subroutine NoahMP36_readcrd()
 ! !USES:
@@ -111,6 +112,20 @@ subroutine NoahMP36_readcrd()
     do n=1, LIS_rc%nnest
         call ESMF_ConfigGetAttribute(LIS_config, NOAHMP36_struc(n)%gen_tbl_name, rc=rc)
         call LIS_verify(rc, "Noah-MP.3.6 general parameter table: not defined")
+    enddo
+
+    !SM irrigation threshold parameter table
+    call ESMF_ConfigFindLabel(LIS_config, "Noah-MP.3.6 irrigation parameter table:", rc = rc)
+    do n=1, LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, NOAHMP36_struc(n)%irr_tbl_name,rc=rc)
+        call LIS_verify(rc, "Noah-MP.3.6 irrigation parameter table: not defined")
+    enddo
+
+    !SM read time window to cumulate irrigation data
+    call ESMF_ConfigFindLabel(LIS_config, "Noah-MP.3.6 calibration time windowsize:", rc = rc)
+    do n=1, LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, NOAHMP36_struc(n)%Tcal_windowsize,rc=rc)
+        call LIS_verify(rc, "Noah-MP.3.6 calibration time windowsize: not defined")
     enddo
  
     ! NoahMP parameter table
