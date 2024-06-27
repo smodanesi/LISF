@@ -56,7 +56,7 @@ contains
 !
 ! !REVISION HISTORY:
 ! 02 Feb 2018: Soni Yatheendradas; Initial Specification
-!
+! 27 Giu 2024: Sara Modanesi; added new parameter IRRTHRESH
 ! !INTERFACE:
   subroutine NoahMP36_setup_pedecvars(DEC_State, Feas_State)
 ! !USES:
@@ -109,7 +109,8 @@ contains
 
     allocate(NoahMP36_pe_struc(LIS_rc%nnest))
     n = 1
-    NoahMP36_pe_struc(n)%nparams = 62
+    !SM
+    NoahMP36_pe_struc(n)%nparams = 63
 
     allocate(NoahMP36_pe_struc(n)%param_name(NoahMP36_pe_struc(n)%nparams))
     allocate(NoahMP36_pe_struc(n)%param_select(NoahMP36_pe_struc(n)%nparams))
@@ -224,6 +225,7 @@ contains
           if(vname.eq."WDPOOL")      then ; do t=1,NT; vardata(t) = NoahMP36_struc(n)%noahmp36(t)%WDPOOL;enddo ;endif
           if(vname.eq."WRRAT")      then ; do t=1,NT; vardata(t) = NoahMP36_struc(n)%noahmp36(t)%WRRAT;enddo ;endif
           if(vname.eq."MRP")      then ; do t=1,NT; vardata(t) = NoahMP36_struc(n)%noahmp36(t)%MRP;enddo ;endif
+          if(vname.eq."IRRTHRESH")      then ; do t=1,NT; vardata(t) =NoahMP36_struc(n)%noahmp36(t)%irrthresh;enddo ;endif !SM
 
              !Test whether any defaults are out of bounds
              count=0
