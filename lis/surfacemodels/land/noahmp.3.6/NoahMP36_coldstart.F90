@@ -18,7 +18,8 @@
 !  by Shugong Wang for the NASA Land Information System Version 7. The initial 
 !  specification of the subroutine is defined by Sujay Kumar. 
 !   9/4/14: Shugong Wang; initial implementation for LIS 7 and NoahMP36
-!
+!  27/06/2024: Sara Modanesi; define IRR_ac_antecedent = 0 in coldstart (needed to
+!  cumulate irrigation in /pe/obspred/SYNirr
 ! !INTERFACE:
 subroutine NoahMP36_coldstart(mtype)
 ! !USES:
@@ -154,8 +155,12 @@ subroutine NoahMP36_coldstart(mtype)
                 NOAHMP36_struc(n)%noahmp36(t)%snowliq(1:NOAHMP36_struc(n)%nsnow) = snliq(-NOAHMP36_struc(n)%nsnow+1:0)
                 NOAHMP36_struc(n)%noahmp36(t)%zss(1:NOAHMP36_struc(n)%nsnow+NOAHMP36_struc(n)%nsoil) = zsnso(-NOAHMP36_struc(n)%nsnow+1:NOAHMP36_struc(n)%nsoil) 
                 NOAHMP36_struc(n)%noahmp36(t)%sstc(NOAHMP36_struc(n)%nsnow+isnow+1:NOAHMP36_struc(n)%nsnow) = tsno(isnow+1:0) 
-                NOAHMP36_struc(n)%noahmp36(t)%isnow = isnow                
-
+                NOAHMP36_struc(n)%noahmp36(t)%isnow = isnow
+                
+                !SM
+                do l=1, NOAHMP36_struc(n)%Tcal_windowsize
+                    NOAHMP36_struc(n)%noahmp36(t)%IRR_ac_antecedent(l) = 0.0
+                enddo
                 
                 ! end add
             enddo
