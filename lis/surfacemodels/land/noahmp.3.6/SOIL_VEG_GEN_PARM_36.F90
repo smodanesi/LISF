@@ -8,13 +8,13 @@
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !-----------------------------------------------------------------
-        SUBROUTINE SOIL_VEG_GEN_PARM_36( VEG_TBL, SOIL_TBL, GEN_TBL, MMINLU, MMINSL)
+        SUBROUTINE SOIL_VEG_GEN_PARM_36( VEG_TBL, SOIL_TBL, GEN_TBL, MMINLU, MMINSL, IRR_TBL) !SM27062024
 !-----------------------------------------------------------------
         USE module_sf_noahlsm_36
         use LIS_logMod, only  : LIS_logunit
         use LIS_coreMod, only : LIS_masterproc
         IMPLICIT NONE
-        CHARACTER(LEN=*), INTENT(IN) :: VEG_TBL, SOIL_TBL, GEN_TBL, MMINLU, MMINSL
+        CHARACTER(LEN=*), INTENT(IN) :: VEG_TBL, SOIL_TBL, GEN_TBL, MMINLU, MMINSL, IRR_TBL
         integer :: LUMATCH, IINDEX, LC, NUM_SLOPE
         integer :: ierr
         INTEGER , PARAMETER :: OPEN_OK = 0
@@ -240,6 +240,19 @@
         READ (19,*)SMHIGH_DATA
         READ (19,*)
         READ (19,*)LVCOEF_DATA
+      CLOSE (19)
+
+      !-----SM27092024 READ IN IRRIGATION PARAMETERS FROM IRRPARM.TBL
+      OPEN(19, FILE=trim(IRR_TBL),FORM='FORMATTED',STATUS='OLD',IOSTAT=ierr)
+      IF(ierr .NE. OPEN_OK ) THEN
+        WRITE(message,FMT='(A)') &
+        'module_sf_noahlsm.F: soil_veg_gen_parm: failure opening IRRPARM.TBL'
+        CALL wrf_error_fatal ( message )
+      END IF
+
+       READ (19,*)
+       READ (19,*)
+       READ (19,*)IRRTHRESH_DATA
       CLOSE (19)
 !-----------------------------------------------------------------
       END SUBROUTINE SOIL_VEG_GEN_PARM_36 
