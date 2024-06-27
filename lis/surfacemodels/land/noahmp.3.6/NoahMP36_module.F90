@@ -186,6 +186,8 @@ module NoahMP36_module
 !     leaf area index. unit: -
 !   \item[sai]
 !     stem area index. unit: -
+!   \item[irr]
+!   irrigation. unit: kg/m-2 s-1 !SM
 !   \item[cm]
 !     momentum drag coefficient. unit: s/m
 !   \item[ch]
@@ -347,7 +349,9 @@ module NoahMP36_module
 !   \item[smcwlt]
 !     wilting point soil moisture (volumetric).
 !   \item[czil]
-!     Calculate roughness length of heat. 
+!     Calculate roughness length of heat.
+!   \item[irrthresh]
+!     Irrigation threshold parameter !SM
 !   \item[frzk]
 !     frozen ground parameter. 
 !   \item[refdk]
@@ -448,7 +452,8 @@ module NoahMP36_module
 !  specification of the module is defined by Sujay Kumar. 
 !  9/4/14: Shugong Wang Initial implementation for LIS 7 and NoahMP36
 !  2/1/18: Soni Yatheendradas: Added calibratable parameters for OPT
-!
+!  27/06/2024: Sara Modanesi; Added items for irrthresh irrigation param, irr (irrigation as
+!  part of Noahmp3.6 structure and IRR_ac_antecedent - needed to cumulate obspred in calibration)
 !EOP
   implicit none
   private
@@ -512,6 +517,7 @@ module NoahMP36_module
      real               :: fastcp
      real               :: lai
      real               :: sai
+     real               :: irr !SM
      real               :: cm
      real               :: ch
      real               :: tauss
@@ -601,6 +607,8 @@ module NoahMP36_module
      !-------------------------------------------------------------------------
      ! calibratable parameters for OPTUE ! SY
      !-------------------------------------------------------------------------
+     !SM: needed to cumulate irrigation data in /noahmp.3.6/pe/obspred/SYNTirr
+     real, allocatable  :: IRR_ac_antecedent(:)
      ! SY: Begin from REDPRM
      !SY: begin vegetation parameters
      real               :: topt
@@ -623,6 +631,9 @@ module NoahMP36_module
      real               :: smcref
      real               :: smcwlt
      !SY: end soil parameters
+     !SM: begin irrigaton threshold parameter
+     real               :: irrthresh
+     !SM: end of irrig. threshold parameter
      !SY: begin universal parameters (not dependent on SOILTYP, VEGTYP)
      real               :: czil
      real               :: frzk
