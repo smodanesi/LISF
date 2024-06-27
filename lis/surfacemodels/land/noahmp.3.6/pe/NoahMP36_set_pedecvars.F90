@@ -13,7 +13,7 @@
 !
 ! !REVISION HISTORY:
 ! 02 Feb 2018: Soni Yatheendradas; Initial Specification
-!
+! 27/06/2024: Sara Modanesi; add irrigation parameter
 
 
 ! !INTERFACE:
@@ -313,7 +313,9 @@ subroutine NoahMP36_setVars(n,DEC_State,mod_flag_NoahMP36)
               if(vname.eq."SMCWLT") &
                    NoahMP36_struc(n)%noahmp36(t)%smcwlt = vardata(t) 
               if(vname.eq."CZIL") &
-                   NoahMP36_struc(n)%noahmp36(t)%czil = vardata(t) 
+                   NoahMP36_struc(n)%noahmp36(t)%czil = vardata(t)
+              if(vname.eq."IRRTHRESH") &
+                   NoahMP36_struc(n)%noahmp36(t)%irrthresh = vardata(t)  !SM           
               if(vname.eq."FRZK") &
                    NoahMP36_struc(n)%noahmp36(t)%frzk = vardata(t) 
               if(vname.eq."REFDK") &
