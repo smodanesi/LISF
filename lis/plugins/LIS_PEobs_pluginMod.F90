@@ -103,6 +103,21 @@ subroutine LIS_PEobs_plugin
    use SMAPsm_obsMod,     only : SMAPsm_obs_setup
 #endif
 
+!SM ADD SYNT IRR OBS
+#if ( defined PE_OBS_SYNTIRR )
+   use SYNTirr_obsMod,     only : SYNTirr_obs_setup
+#endif
+
+!SM ADD SYNTHETIC SM OBS
+#if ( defined PE_OBS_SYNTSM )
+   use SYNTsm_obsMod,     only : SYNTsm_obs_setup
+#endif
+
+!SM ADD SYNTHETIC LAI OBS
+#if ( defined PE_OBS_SYNTLAI )
+   use SYNTlai_obsMod,     only : SYNTlai_obs_setup
+#endif
+
 #if ( defined PE_OBS_UASNOW)
    use UAsnow_obsMod,     only : UAsnow_obs_setup
 #endif
@@ -174,6 +189,21 @@ subroutine LIS_PEobs_plugin
 
 #if ( defined PE_OBS_SMAPSM )
    external read_SMAPsmobs, write_SMAPsmobs, reset_SMAPsmobs
+#endif
+
+!SM ADD SYNT IRR OBS
+#if ( defined PE_OBS_SYNTIRR )
+   external read_SYNTirrobs, write_SYNTirrobs, reset_SYNTirrobs
+#endif
+
+!SM ADD SYNTHETIC SM OBS
+#if ( defined PE_OBS_SYNTSM )
+   external read_SYNTsmobs, write_SYNTsmobs, reset_SYNTsmobs
+#endif
+
+!SM ADD SYNTHETIC LAI OBS
+#if ( defined PE_OBS_SYNTLAI )
+   external read_SYNTlaiobs, write_SYNTlaiobs, reset_SYNTlaiobs
 #endif
 
 #if ( defined PE_OBS_UASNOW )
@@ -368,6 +398,43 @@ subroutine LIS_PEobs_plugin
    call registerpeobsreset(trim(LIS_SMAPsmobsId)//char(0), &
                            reset_SMAPsmobs)
 #endif
+
+!SM add SYNT IRR
+#if ( defined PE_OBS_SYNTIRR )
+   call registerpeobssetup(trim(LIS_SYNTirrobsId)//char(0), &
+                           SYNTirr_obs_setup)
+   call registergetpeobs(trim(LIS_SYNTirrobsId)//char(0), &
+                         read_SYNTirrobs)
+   call registerwritepeobs(trim(LIS_SYNTirrobsId)//char(0), &
+                           write_SYNTirrobs)
+   call registerpeobsreset(trim(LIS_SYNTirrobsId)//char(0), &
+                           reset_SYNTirrobs)
+#endif
+
+!SM add SYNT SM
+#if ( defined PE_OBS_SYNTSM )
+   call registerpeobssetup(trim(LIS_SYNTsmobsId)//char(0), &
+                           SYNTsm_obs_setup)
+   call registergetpeobs(trim(LIS_SYNTsmobsId)//char(0), &
+                         read_SYNTsmobs)
+   call registerwritepeobs(trim(LIS_SYNTsmobsId)//char(0), &
+                           write_SYNTsmobs)
+   call registerpeobsreset(trim(LIS_SYNTsmobsId)//char(0), &
+                           reset_SYNTsmobs)
+#endif
+
+!SM add SYNT LAI
+#if ( defined PE_OBS_SYNTLAI )
+   call registerpeobssetup(trim(LIS_SYNTlaiobsId)//char(0), &
+                           SYNTlai_obs_setup)
+   call registergetpeobs(trim(LIS_SYNTlaiobsId)//char(0), &
+                         read_SYNTlaiobs)
+   call registerwritepeobs(trim(LIS_SYNTlaiobsId)//char(0), &
+                           write_SYNTlaiobs)
+   call registerpeobsreset(trim(LIS_SYNTlaiobsId)//char(0), &
+                           reset_SYNTlaiobs)
+#endif
+
 
 #if ( defined PE_OBS_UASNOW )
    call registerpeobssetup(trim(LIS_UAsnowobsId)//char(0), &
