@@ -31,6 +31,7 @@ module LIS_pluginIndices
 !   4 Nov 2014: Jonathan Case, added support for daily NESDIS/VIIRS GVF for Noah
 !  16 Aug 2016: Mahdi Navari, added PILDAS  
 !  28 Aug 2020: Sara Modanesi, added WCM in Radiative Transfer Models
+!  28 Jun 2024: Sara Modanesi, added new optimization sets
 !
 !EOP
   PRIVATE
@@ -351,6 +352,9 @@ module LIS_pluginIndices
    character*50, public,  parameter :: LIS_ARSsmobsId = "ARS sm" ! SY
    character*50, public,  parameter :: LIS_ISMNsmobsId = "ISMN sm" 
    character*50, public,  parameter :: LIS_SMAPsmobsId = "SMAP sm"
+   character*50, public,  parameter :: LIS_SYNTirrobsId = "SYNT irr" !SM
+   character*50, public,  parameter :: LIS_SYNTsmobsId = "SYNT sm"   !SM
+   character*50, public,  parameter :: LIS_SYNTlaiobsId = "SYNT lai" !SM
    character*50, public,  parameter :: LIS_UAsnowobsId = "UA snow"
 !-------------------------------------------------------------------------
 ! Objective Function Evaluation Criteria
