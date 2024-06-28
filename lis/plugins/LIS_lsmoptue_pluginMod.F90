@@ -127,6 +127,15 @@ subroutine LIS_lsmoptue_plugin
 
    external NoahMP36_getpeobspred_SMAPsmobs
    external NoahMP36_setupobspred_SMAPsmobs
+   
+   external NoahMP36_getpeobspred_SYNTirrobs
+   external NoahMP36_setupobspred_SYNTirrobs
+
+   external NoahMP36_getpeobspred_SYNTsmobs
+   external NoahMP36_setupobspred_SYNTsmobs
+
+   external NoahMP36_getpeobspred_SYNTlaiobs
+   external NoahMP36_setupobspred_SYNTlaiobs
 
 #endif
 
@@ -294,6 +303,28 @@ subroutine LIS_lsmoptue_plugin
    call registerlsmpegetobspred(trim(LIS_noahmp36Id)//"+"//      &
                                 trim(LIS_SMAPsmobsId)//char(0), &
                                 NoahMP36_getpeobspred_SMAPsmobs)
+
+   call registerlsmpesetupobspred(trim(LIS_noahmp36Id)//"+"//      &
+                                  trim(LIS_SYNTirrobsId)//char(0), &
+                                  NoahMP36_setupobspred_SYNTirrobs)
+   call registerlsmpegetobspred(trim(LIS_noahmp36Id)//"+"//      &
+                                trim(LIS_SYNTirrobsId)//char(0), &
+                                NoahMP36_getpeobspred_SYNTirrobs)
+
+   call registerlsmpesetupobspred(trim(LIS_noahmp36Id)//"+"//      &
+                                  trim(LIS_SYNTsmobsId)//char(0), &
+                                  NoahMP36_setupobspred_SYNTsmobs)
+   call registerlsmpegetobspred(trim(LIS_noahmp36Id)//"+"//      &
+                                trim(LIS_SYNTsmobsId)//char(0), &
+                                NoahMP36_getpeobspred_SYNTsmobs)
+
+   call registerlsmpesetupobspred(trim(LIS_noahmp36Id)//"+"//      &
+                                  trim(LIS_SYNTlaiobsId)//char(0), &
+                                  NoahMP36_setupobspred_SYNTlaiobs)
+   call registerlsmpegetobspred(trim(LIS_noahmp36Id)//"+"//      &
+                                trim(LIS_SYNTlaiobsId)//char(0), &
+                                NoahMP36_getpeobspred_SYNTlaiobs)
+
 #endif
 
 #if ( defined SM_NOAHMP_4_0_1 )
