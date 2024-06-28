@@ -19,7 +19,7 @@ module paramEstim_runMod
 !   
 ! !REVISION HISTORY: 
 !  21Oct05    Sujay Kumar  Initial Specification
-! 
+!  28/06/2024 Sara Modanesi; allowing running irrigation in paramEstim mode
 !
   implicit none
   
@@ -49,6 +49,7 @@ contains
     use LIS_dataAssimMod,   only : LIS_dataassim_init
     use LIS_paramsMod,      only : LIS_param_init
     use LIS_routingMod,     only : LIS_routing_init, LIS_routing_readrestart
+    use LIS_irrigationMod,  only : LIS_irrigation_init !SM
     use LIS_RTMMod,          only : LIS_RTM_init
     use LIS_appMod,          only : LIS_appModel_init
     use LIS_optUEMod, only : LIS_optUE_init, &
@@ -81,6 +82,7 @@ contains
     call LIS_perturb_init
     call LIS_surfaceModel_init
     call LIS_metforcing_init
+    call LIS_irrigation_init !SM
     call LIS_initDAObservations
     call LIS_dataassim_init
     call LIS_surfaceModel_setup
@@ -115,6 +117,7 @@ contains
     use LIS_DAobservationsMod, only : LIS_initDAObservations
     use LIS_dataAssimMod,   only : LIS_dataassim_init
     use LIS_routingMod,     only : LIS_routing_init, LIS_routing_readrestart
+    use LIS_irrigationMod,     only : LIS_irrigation_init  !SM
     use LIS_RTMMod,          only : LIS_RTM_init
     use LIS_appMod,          only : LIS_appModel_init
     use LIS_paramsMod,       only : LIS_param_reset, LIS_param_init, LIS_param_finalize
@@ -179,6 +182,7 @@ contains
     use LIS_dataAssimMod,    only : LIS_dataassim_run, LIS_dataassim_output
     use LIS_routingMod,      only : LIS_routing_run, LIS_routing_writeoutput, &
          LIS_routing_writerestart
+    use LIS_irrigationMod,   only : LIS_irrigation_run,LIS_irrigation_output  !SM
     use LIS_RTMMod,          only : LIS_RTM_run,LIS_RTM_output
     use LIS_logMod,          only : LIS_logunit
 
@@ -187,6 +191,7 @@ contains
      call LIS_setDynparams(n)
      call LIS_get_met_forcing(n)
      call LIS_perturb_forcing(n)
+     call LIS_irrigation_run(n)      !SM
      call LIS_surfaceModel_f2t(n)  
 
      call LIS_surfaceModel_run(n)
@@ -207,6 +212,7 @@ contains
 
      call LIS_surfaceModel_output(n)  
      call LIS_surfaceModel_writerestart(n)
+     call LIS_irrigation_output(n)   !SM
 
   end subroutine lis_run_step
 
