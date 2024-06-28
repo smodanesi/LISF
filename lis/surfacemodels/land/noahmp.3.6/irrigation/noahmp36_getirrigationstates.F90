@@ -64,6 +64,8 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
 ! Feb 2022: Sara Modanesi; adding double option for activating irrigation (i.e.
 !                          growing season based on climatological GVF or based
 !                          on dynamic LAI
+! June 2024: Sara Modanesi; adding new irrithresh parameter and store irrigation
+! in Noahmp structure
 !EOP
   implicit none
   ! Sprinkler parameters
@@ -216,6 +218,10 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
      ltime = real(lhr)+real(LIS_rc%mn)/60.0+real(LIS_rc%ss)/3600.0
     
      shdfac =  NOAHMP36_struc(n)%noahmp36(t)%shdfac_monthly(LIS_rc%mo)
+     
+     !SM to run pe experiment and calibrate with irrigation we need to 
+     !add an additional var in the noahmp structure which will be filled with irrigRate
+     NOAHMP36_struc(n)%noahmp36(t)%irr= 0.0
 
    ! If we are outside of the irrigation window, set rate to 0
      if ((ltime.gt.shift_otimee).or.(ltime.lt.shift_otimes)) then
@@ -345,7 +351,8 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
                          !     Get the root zone moisture availability to the plant
                          !--------------------------------------------------------------- 
                              ma = (asmc-tsmcwlt) /(tsmcref - tsmcwlt)
-                             if(ma.le.LIS_rc%irrigation_thresh) then 
+                             !if(ma.le.LIS_rc%irrigation_thresh) then 
+                             if( ma .le. NOAHMP36_struc(n)%noahmp36(t)%irrthresh) then !SM
                                 do k=1,lroot
                                    water(k) = &
                                         (smcref-NOAHMP36_struc(n)%noahmp36(t)%smc(k))*&
@@ -371,6 +378,7 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
                              !-----------------------------------------------------------------------------
                              !     Compute irrigation rate
                                 irrigRate(t) = twater/(irrhr*3600.0)
+                                NOAHMP36_struc(n)%noahmp36(t)%irr=irrigRate(t) !SM
 
                            endif
                         endif
