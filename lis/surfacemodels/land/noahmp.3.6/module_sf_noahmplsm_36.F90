@@ -35,6 +35,7 @@ use ESMF
        &                       RSMAX_DATA, &
        &                       ZBOT_DATA,  &
        &                       CZIL_DATA,  &
+       &                       IRRTHRESH_DATA,  & !SM
        &                       FRZK_DATA,  &
        &                       SLOPE_DATA, &
        &                       REFDK_DATA, &
