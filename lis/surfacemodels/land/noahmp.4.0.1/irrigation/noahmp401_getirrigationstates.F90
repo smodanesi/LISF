@@ -107,7 +107,8 @@ subroutine noahmp401_getirrigationstates(n,irrigState)
   real                 :: smhigh, smlow
   integer              :: lroot,veg_index1,veg_index2
   real                 :: gsthresh, ltime
-  real                 :: shdfac, shdmin, shdmax
+  real                 :: shdfac, shdmin, shdmax, shdfac2 !SM Sep 2024
+  real                 :: lai, var !SM Sep 2024  
   real                 :: timestep, shift_otimes, shift_otimee
   real                 :: AWS
   real                 :: Dtime
@@ -320,16 +321,31 @@ subroutine noahmp401_getirrigationstates(n,irrigState)
 				   ! the range is, the higher GVF threshold will be for this grid.                           
 				   ! JE Gsthresh is a GVF threshold used to identify a growing season for each
 				   ! pixel and allow irrigation during that time
-					  gsthresh = shdmin + & 
-						  (LIS_rc%irrigation_GVFparam1 + LIS_rc%irrigation_GVFparam2*&
-						   (shdmax-shdmin)) * (shdmax - shdmin)
+                                   !SM Sept 2024 start changes to avoid douple option for the growing
+                                   !season: dynamic LAI or climatological GVF
+                                         if(LIS_rc%growing_season .eq. 1) then!GVF
+
+                                           gsthresh = shdmin + &
+                                               (LIS_rc%irrigation_GVFparam1 + LIS_rc%irrigation_GVFparam2*&
+                                                (shdmax-shdmin)) * (shdmax - shdmin)
+                                           var=shdfac
+                                           shdfac2=shdfac
+
+                                         elseif(LIS_rc%growing_season .eq. 0) then
+
+                                           lai= NOAHMP36_struc(n)%noahmp36(t)%lai
+                                           gsthresh=1.0
+                                           var=lai
+                                           shdfac2=1.0 - exp((-0.5)*lai) !based on Fang et al., 2018
+
+                                         endif
 
 
 					 !JE Changes needed to this code block to account for variable soil layers
 					 ! in Noah-MP
 					 
-					 if(shdfac .ge. gsthresh) then 
-						crootd = irrigRootdepth(t)*shdfac
+					 if(var .ge. gsthresh) then !SM Sept 2024
+						crootd = irrigRootdepth(t)*shdfac2  !SM Sept 2024
 						if(crootd.gt.0.and.crootd.lt.zdpth(1)) then 
 						   lroot = 1
 						   rdpth(1) = crootd
