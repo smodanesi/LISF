@@ -383,6 +383,11 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
                            endif
                         endif
                      endif
+                     !SM register %irr in Noah-MP struc for all irrigation time window
+                     if ((ltime.gt.shift_otimes).and.(ltime.lt.shift_otimee)) then
+                        NOAHMP36_struc(n)%noahmp36(t)%irr=irrigRate(t)
+                     endif
+
                        !!!!! DRIP IRRIGATION (NOT CURRENTLY IMPLEMENTED)
                   elseif(LIS_rc%irrigation_type.eq."Drip") then
                        ! Need to get crop coefficient so that we can caculate unstressed Transp
