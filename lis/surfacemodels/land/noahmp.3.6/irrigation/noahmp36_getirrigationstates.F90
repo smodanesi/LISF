@@ -66,6 +66,9 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
 !                          on dynamic LAI
 ! June 2024: Sara Modanesi; adding new irrithresh parameter and store irrigation
 ! in Noahmp structure
+! December 2024: Sara Modanesi; possibility to read a spatially distributed TBL 
+! of the irrigation parameter for retrospective runs & Sprinkler + applying new 
+! irrigation parameter to the amount of irrigation water
 !EOP
   implicit none
   ! Sprinkler parameters
@@ -117,6 +120,20 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
 !--------------wanshu-----add temp check-------
   real                 :: sfctemp, tempcheck
 
+!-------------Sara Modanesi----read in calibrated irrigation threshold
+  character(len=256) :: IRRTH_tbl_name
+
+  real, allocatable :: irrth(:)
+  real, allocatable :: lone(:)
+  real, allocatable :: late(:)
+  real                :: lon1, lat1,lon,lat
+  integer             :: col,row
+  integer             :: p,tt,gg
+  integer :: ierr
+  integer , parameter :: OPEN_OK = 0
+  character*128 :: message
+!----------------------------------------------------------------------
+
   call ESMF_StateGet(irrigState, "Irrigation rate",irrigRateField,rc=rc)
   call LIS_verify(rc,'ESMF_StateGet failed for Irrigation rate')    
   call ESMF_FieldGet(irrigRateField, localDE=0,farrayPtr=irrigRate,rc=rc)
@@ -167,7 +184,46 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
      otimee = otimefs + irrhrf
   endif
   
- 
+!-------------------------------------------------------------------------
+! SARA MODANESI; Set a spatially distributed IRRth, only if Sprinkler irrigation and run =retrospective
+  if(LIS_rc%irrigation_type.eq."Sprinkler".and. LIS_rc%runmode.eq."retrospective") then
+    !if (allocated(irrth)) deallocate(irrth)
+    !if (allocated(lone)) deallocate(lone)
+    !if (allocated(late)) deallocate(late)
+    allocate(irrth(LIS_rc%glbngrid(n)))
+    allocate(lone(LIS_rc%glbngrid(n)))
+    allocate(late(LIS_rc%glbngrid(n)))
+
+    call ESMF_ConfigFindLabel(LIS_config, "Spatial Irrigation Threshold table:",rc = rc)
+    call ESMF_ConfigGetAttribute(LIS_config,IRRTH_tbl_name, rc=rc)
+    call LIS_verify(rc, "Spatial Irrigation Threshold table: not defined")
+    OPEN(19, FILE=trim(IRRTH_tbl_name),FORM='FORMATTED',STATUS='OLD',IOSTAT=ierr)
+    IF(ierr .NE. OPEN_OK ) THEN
+      WRITE(message,FMT='(A)') &
+      'failure opening IRRTH_PARM.TBL'
+      CALL wrf_error_fatal ( message )
+    END IF
+    do gg=1,LIS_rc%glbngrid(n)
+        READ (19,*) irrth(gg), lone(gg), late(gg)
+    enddo
+    CLOSE (19)
+
+    do tt=1, LIS_rc%npatch(n,LIS_rc%lsm_index)
+       row = LIS_surface(n, LIS_rc%lsm_index)%tile(tt)%row
+       col = LIS_surface(n, LIS_rc%lsm_index)%tile(tt)%col
+       lat = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lat
+       lon = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lon
+       do p=1,LIS_rc%glbngrid(n)
+          lon1= lone(p)
+          lat1= late(p)
+          if (lon1 .eq. lon .and. lat1 .eq. lat) then
+             NOAHMP36_struc(n)%noahmp36(tt)%irrthresh=irrth(p)
+          endif
+       enddo
+    enddo
+  endif
+!------------------------------------------------------------------------  
+
   do t=1,LIS_rc%npatch(n,LIS_rc%lsm_index)
 
      timestep = NOAHMP36_struc(n)%dt
@@ -351,15 +407,15 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
                          !     Get the root zone moisture availability to the plant
                          !--------------------------------------------------------------- 
                              ma = (asmc-tsmcwlt) /(tsmcref - tsmcwlt)
-                             !if(ma.le.LIS_rc%irrigation_thresh) then 
-                             if( ma .le. NOAHMP36_struc(n)%noahmp36(t)%irrthresh) then !SM
+                             if(ma.le.LIS_rc%irrigation_thresh) then 
+                             !if( ma .le. NOAHMP36_struc(n)%noahmp36(t)%irrthresh) then !SM
                                 do k=1,lroot
                                    water(k) = &
                                         (smcref-NOAHMP36_struc(n)%noahmp36(t)%smc(k))*&
                                         rdpth(k)*1000.0
                                    twater = twater + water(k)
                                 enddo
-                                
+                                twater=twater*NOAHMP36_struc(n)%noahmp36(t)%irrthresh   
                              !-----------------------------------------------------------------------------
                              !     Scale the irrigation intensity to the crop % when intensity < crop%.
                              !     Expand irrigation for non-crop, non-forest when intensity > crop %
