@@ -63,12 +63,12 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
 !                             at otimess and applies constant rate for irrhrs
 ! Feb 2022: Sara Modanesi; adding double option for activating irrigation (i.e.
 !                          growing season based on climatological GVF or based
-!                          on dynamic LAI
-! June 2024: Sara Modanesi; adding new irrithresh parameter and store irrigation
-! in Noahmp structure
+!                          on dynamic LAI)
+! June 2024: Sara Modanesi; adding new irrthresh parameter and store irrigation
+!                          in Noahmp structure for optimization
 ! December 2024: Sara Modanesi; possibility to read a spatially distributed TBL 
-! of the irrigation parameter for retrospective runs & Sprinkler + applying new 
-! irrigation parameter to the amount of irrigation water
+!                          of the new irrthresh parameter for retrospective runs & Sprinkler; 
+!                          applying new irrigation parameter (SIC) to the amount of irrigation water
 !EOP
   implicit none
   ! Sprinkler parameters
@@ -120,7 +120,7 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
 !--------------wanshu-----add temp check-------
   real                 :: sfctemp, tempcheck
 
-!-------------Sara Modanesi----read in calibrated irrigation threshold
+!-------------Sara Modanesi----add TBL for calibrated irrthresh parameter (for retrospective runs)
   character(len=256) :: IRRTH_tbl_name
 
   real, allocatable :: irrth(:)
@@ -408,14 +408,14 @@ subroutine noahmp36_getirrigationstates(n,irrigState)
                          !--------------------------------------------------------------- 
                              ma = (asmc-tsmcwlt) /(tsmcref - tsmcwlt)
                              if(ma.le.LIS_rc%irrigation_thresh) then 
-                             !if( ma .le. NOAHMP36_struc(n)%noahmp36(t)%irrthresh) then !SM
+                             !if( ma .le. NOAHMP36_struc(n)%noahmp36(t)%irrthresh) then !SM: initial opt version
                                 do k=1,lroot
                                    water(k) = &
                                         (smcref-NOAHMP36_struc(n)%noahmp36(t)%smc(k))*&
                                         rdpth(k)*1000.0
                                    twater = twater + water(k)
                                 enddo
-                                twater=twater*NOAHMP36_struc(n)%noahmp36(t)%irrthresh   
+                                twater=twater*NOAHMP36_struc(n)%noahmp36(t)%irrthresh !apply irrthresho=SIC parameter  
                              !-----------------------------------------------------------------------------
                              !     Scale the irrigation intensity to the crop % when intensity < crop%.
                              !     Expand irrigation for non-crop, non-forest when intensity > crop %
