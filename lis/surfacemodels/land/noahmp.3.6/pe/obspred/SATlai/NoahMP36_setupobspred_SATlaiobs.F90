@@ -8,14 +8,14 @@
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !BOP
-! !ROUTINE: NoahMP36_setupobspred_SYNTlaiobs
-!  \label{NoahMP36_setupobspred_SYNTlaiobs}
+! !ROUTINE: NoahMP36_setupobspred_SATlaiobs
+!  \label{NoahMP36_setupobspred_SATlaiobs}
 !
 ! !REVISION HISTORY:
 ! 21 JUN 2023: Sara Modanesi; Initial Specification modified based on the SMAPsm dir
-!
+! 14 May 2025: Sara Modanesi; changed specification from SYNTlai to SATlai to avoid confusion and calibrate with sat obs
 ! !INTERFACE:
-subroutine NoahMP36_setupobspred_SYNTlaiobs(OBSPred)
+subroutine NoahMP36_setupobspred_SATlaiobs(OBSPred)
 ! !USES:
   use ESMF
   use LIS_coreMod,      only : LIS_rc, LIS_vecPatch
@@ -42,11 +42,11 @@ subroutine NoahMP36_setupobspred_SYNTlaiobs(OBSPred)
   call LIS_verify(status)
 
   laiField = ESMF_FieldCreate(arrayspec=realarrspec, grid=LIS_vecPatch(n,LIS_rc%lsm_index), &
-       name="SYNT_lai", rc=status)
+       name="SAT_lai", rc=status)
   call LIS_verify(status)
   
   call ESMF_StateAdd(OBSPred,(/laiField/),rc=status)
   call LIS_verify(status)
 
-end subroutine NoahMP36_setupobspred_SYNTlaiobs
+end subroutine NoahMP36_setupobspred_SATlaiobs
 
