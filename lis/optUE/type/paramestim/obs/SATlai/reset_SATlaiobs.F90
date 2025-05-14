@@ -8,18 +8,18 @@
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !BOP
-! !ROUTINE: reset_SYNTlaiobs
-! \label{reset_SYNTlaiobs}
+! !ROUTINE: reset_SATlaiobs
+! \label{reset_SATlaiobs}
 !
 ! !REVISION HISTORY:
 !  21 June 2023: Sara Modanesi; Initial Specification
-!
+!  14 May 2025 : Sara Modanesi; changed specifications from SYNTlai to SATlai (avoid confusion and calibrate with satellite data)
 ! !INTERFACE: 
-subroutine reset_SYNTlaiobs(Obj_Space)
+subroutine reset_SATlaiobs(Obj_Space)
 ! !USES: 
   use ESMF
   use LIS_coreMod,        only : LIS_rc
-  use SYNTlai_obsMod,       only : SYNTlai_obs_struc
+  use SATlai_obsMod,       only : SATlai_obs_struc
 
   implicit none
 ! !ARGUMENTS: 
@@ -27,7 +27,7 @@ subroutine reset_SYNTlaiobs(Obj_Space)
 !
 ! !DESCRIPTION:
 !  
-!  resets the synthetic leaf area index data structure for parameter
+!  resets the satellite leaf area index data structure for parameter
 !  optimization
 !  
 !  The arguments are: 
@@ -40,5 +40,5 @@ subroutine reset_SYNTlaiobs(Obj_Space)
 
   integer            :: n
 
-end subroutine reset_SYNTlaiobs
+end subroutine reset_SATlaiobs
 
