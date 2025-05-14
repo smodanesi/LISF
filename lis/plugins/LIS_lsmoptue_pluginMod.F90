@@ -20,7 +20,7 @@ module LIS_lsmoptue_pluginMod
 !
 ! !REVISION HISTORY:
 !  16 Jul 09    Sujay Kumar  Initial Specification
-!
+!  25 May 2025; Sara Modanesi: added spec for SYNT SM, IRR and SAT LAI
   implicit none
 
   PRIVATE
@@ -134,8 +134,8 @@ subroutine LIS_lsmoptue_plugin
    external NoahMP36_getpeobspred_SYNTsmobs
    external NoahMP36_setupobspred_SYNTsmobs
 
-   external NoahMP36_getpeobspred_SYNTlaiobs
-   external NoahMP36_setupobspred_SYNTlaiobs
+   external NoahMP36_getpeobspred_SATlaiobs
+   external NoahMP36_setupobspred_SATlaiobs
 
 #endif
 
@@ -319,11 +319,11 @@ subroutine LIS_lsmoptue_plugin
                                 NoahMP36_getpeobspred_SYNTsmobs)
 
    call registerlsmpesetupobspred(trim(LIS_noahmp36Id)//"+"//      &
-                                  trim(LIS_SYNTlaiobsId)//char(0), &
-                                  NoahMP36_setupobspred_SYNTlaiobs)
+                                  trim(LIS_SATlaiobsId)//char(0), &
+                                  NoahMP36_setupobspred_SATlaiobs)
    call registerlsmpegetobspred(trim(LIS_noahmp36Id)//"+"//      &
-                                trim(LIS_SYNTlaiobsId)//char(0), &
-                                NoahMP36_getpeobspred_SYNTlaiobs)
+                                trim(LIS_SATlaiobsId)//char(0), &
+                                NoahMP36_getpeobspred_SATlaiobs)
 
 #endif
 
