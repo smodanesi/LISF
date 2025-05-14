@@ -11,14 +11,14 @@
 !EDIT-----------------------
 #include "LIS_misc.h"
 !BOP
-! !ROUTINE: read_SYNTlaiobs
-! \label{read_SYNTlaiobs}
+! !ROUTINE: read_SATlaiobs
+! \label{read_SATlaiobs}
 !
 ! !REVISION HISTORY:
 !  21 Jun 2023  Sara Modanesi;   Initial Specification
-
+!  14 May 2025  Sara Modanesi;   changed specification from SYNTlai to SATlai to avoid confusion and run opt. with satellite LAI 
 ! !INTERFACE: 
-subroutine read_SYNTlaiobs(Obj_Space) 
+subroutine read_SATlaiobs(Obj_Space) 
 ! !USES: 
   use ESMF
   use LIS_coreMod
@@ -26,7 +26,7 @@ subroutine read_SYNTlaiobs(Obj_Space)
   use LIS_logMod
   use map_utils
   use LIS_fileIOMod
-  use SYNTlai_obsMod
+  use SATlai_obsMod
 
   implicit none
 ! !ARGUMENTS: 
@@ -58,21 +58,21 @@ subroutine read_SYNTlaiobs(Obj_Space)
        data_update, rc=status)
   call LIS_verify(status, 'Error in ESMF_AttributeGet: Data Update Status')
 
-  alarmCheck = LIS_isAlarmRinging(LIS_rc, "SYNT lai read alarm")
+  alarmCheck = LIS_isAlarmRinging(LIS_rc, "SAT lai read alarm")
   
-  if(alarmCheck.or.SYNTlai_obs_struc(n)%startMode) then
-     SYNTlai_obs_struc(n)%startMode = .false.
-     SYNTlai_obs_struc(n)%laiobs= LIS_rc%udef
-     SYNTlai_obs_struc(n)%laitime = -1
+  if(alarmCheck.or.SATlai_obs_struc(n)%startMode) then
+     SATlai_obs_struc(n)%startMode = .false.
+     SATlai_obs_struc(n)%laiobs= LIS_rc%udef
+     SATlai_obs_struc(n)%laitime = -1
 
-     call SYNTlaiobs_filename(fname,obsdir,&
+     call SATlaiobs_filename(fname,obsdir,&
           LIS_rc%yr,LIS_rc%mo,LIS_rc%da, LIS_rc%hr)
 
      inquire(file=fname,exist=file_exists)
      if(file_exists) then
 
-        write(LIS_logunit,*)  '[INFO] Reading SYNT lai data', fname
-        call read_SYNTlaiobs_data(n, fname,SYNTlai_obs_struc(n)%laiobs)
+        write(LIS_logunit,*)  '[INFO] Reading SAT lai data', fname
+        call read_SATlaiobs_data(n, fname,SATlai_obs_struc(n)%laiobs)
 
 !-------------------------------------------------------------------------
 ! Store the LAI time (modified from Sentinel1 backscatter DA)
@@ -86,17 +86,17 @@ subroutine read_SYNTlaiobs(Obj_Space)
 
                  !lhour = 11.0 
                  !call LIS_localtime2gmt(gmt,lon,lhour,zone)
-                 !SYNTlai_obs_struc(n)%laitime(c,r) = gmt
+                 !SATlai_obs_struc(n)%laitime(c,r) = gmt
                  !or another option
-                 SYNTlai_obs_struc(n)%laitime(c,r) = LIS_rc%hr
+                 SATlai_obs_struc(n)%laitime(c,r) = LIS_rc%hr
               endif
            enddo
         enddo
      endif
   endif
-  call ESMF_StateGet(Obj_Space,"SYNT_lai",laiField,&
+  call ESMF_StateGet(Obj_Space,"SAT_lai",laiField,&
           rc=status)
-  call LIS_verify(status, 'Error in ESMF_StateGet: SYNT_lai')
+  call LIS_verify(status, 'Error in ESMF_StateGet: SAT_lai')
 
   call ESMF_FieldGet(laiField,localDE=0,farrayPtr=lai,rc=status)
   call LIS_verify(status, 'Error in ESMF_FieldGet: laiField')
@@ -111,12 +111,12 @@ subroutine read_SYNTlaiobs(Obj_Space)
         if(LIS_domain(n)%gindex(c,r).ne.-1) then
            grid_index = c+(r-1)*LIS_rc%lnc(n)
 
-           dt = (LIS_rc%gmt - SYNTlai_obs_struc(n)%laitime(c,r))*3600.0
+           dt = (LIS_rc%gmt - SATlai_obs_struc(n)%laitime(c,r))*3600.0
            lon = LIS_domain(n)%lon(grid_index)
 
            if(dt.ge.0.and.dt.lt.LIS_rc%ts) then
               lai(LIS_domain(n)%gindex(c,r)) = &
-                   SYNTlai_obs_struc(n)%laiobs(c,r)
+                   SATlai_obs_struc(n)%laiobs(c,r)
            endif
         endif
      enddo
@@ -126,15 +126,15 @@ subroutine read_SYNTlaiobs(Obj_Space)
        .true., rc=status)
   call LIS_verify(status, 'Error in ESMF_AttributeSet: Data Update Status')
 
-end subroutine read_SYNTlaiobs
+end subroutine read_SATlaiobs
 
 !BOP
 !
-! !ROUTINE: read_SYNTlaiobs_data
-! \label{read_SYNTlaiobs_data}
+! !ROUTINE: read_SATlaiobs_data
+! \label{read_SATlaiobs_data}
 !
 ! !INTERFACE:
-subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
+subroutine read_SATlaiobs_data(n, fname, lai_ip)
 !
 ! !USES:
 #if(defined USE_NETCDF3 || defined USE_NETCDF4)
@@ -143,7 +143,7 @@ subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
   use LIS_coreMod
   use LIS_logMod
   use map_utils,    only : latlon_to_ij
-  use SYNTlai_obsMod, only : SYNTlai_obs_struc
+  use SATlai_obsMod, only : SATlai_obs_struc
 
   implicit none
 !
@@ -159,7 +159,7 @@ subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
 !  The arguments are:
 !  \begin{description}
 !  \item[n]            index of the nest
-!  \item[fname]        name of the SYNT lai file
+!  \item[fname]        name of the SAT lai file
 !  \item[lai\_ip]   lai data simulated in LIS (same LIS domain)
 ! \end{description}
 !
@@ -168,10 +168,10 @@ subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
 ! !REVISION HISTORY:
 !
 !EOP
-  real                        :: leafareaindex(SYNTlai_obs_struc(n)%nr,SYNTlai_obs_struc(n)%nc)
-  real                        :: lat_nc(SYNTlai_obs_struc(n)%nr)
-  real                        :: lat_nc_fold(SYNTlai_obs_struc(n)%nr)
-  real                        :: lon_nc(SYNTlai_obs_struc(n)%nc)
+  real                        :: leafareaindex(SATlai_obs_struc(n)%nr,SATlai_obs_struc(n)%nc)
+  real                        :: lat_nc(SATlai_obs_struc(n)%nr)
+  real                        :: lat_nc_fold(SATlai_obs_struc(n)%nr)
+  real                        :: lon_nc(SATlai_obs_struc(n)%nc)
   real                        :: lai_ip(LIS_rc%lnc(n),LIS_rc%lnr(n))
   integer                     :: nlai_ip(LIS_rc%lnc(n),LIS_rc%lnr(n))
   logical                     :: file_exists
@@ -193,7 +193,7 @@ subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
 
      ! variables
      ios = nf90_inq_varid(nid, 'lai',laiid)
-     call LIS_verify(ios, 'Error nf90_inq_varid: SYNT lai data')
+     call LIS_verify(ios, 'Error nf90_inq_varid: SAT lai data')
 
      ios = nf90_inq_varid(nid, 'lat',latid)
      call LIS_verify(ios, 'Error nf90_inq_varid: latitude data')
@@ -224,12 +224,12 @@ subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
      nlai_ip = 0
 
      ! Interpolate the data by averaging 
-     do i=1,SYNTlai_obs_struc(n)%nr
-        do j=1,SYNTlai_obs_struc(n)%nc
+     do i=1,SATlai_obs_struc(n)%nr
+        do j=1,SATlai_obs_struc(n)%nc
 
            call latlon_to_ij(LIS_domain(n)%lisproj,&
                 !lat_nc(i),lon_nc(j),col,row)
-                lat_nc(SYNTlai_obs_struc(n)%nr-(i-1)),lon_nc(j),col,row)
+                lat_nc(SATlai_obs_struc(n)%nr-(i-1)),lon_nc(j),col,row)
            stn_col = nint(col)
            stn_row = nint(row)
 
@@ -258,12 +258,12 @@ subroutine read_SYNTlaiobs_data(n, fname, lai_ip)
 
 #endif
 
-end subroutine read_SYNTlaiobs_data
+end subroutine read_SATlaiobs_data
 
 
 
 ! ! INTERFACE:
-subroutine SYNTlaiobs_filename(filename, ndir, yr, mo, da, hr)
+subroutine SATlaiobs_filename(filename, ndir, yr, mo, da, hr)
 
   implicit none
 ! !ARGUMENTS: 
@@ -272,12 +272,12 @@ subroutine SYNTlaiobs_filename(filename, ndir, yr, mo, da, hr)
   character (len=*) :: ndir
 ! 
 ! !DESCRIPTION: 
-!  This subroutine creates a timestamped SYNTHETIC leafareaindex filename
+!  This subroutine creates a timestamped SATELLITE leafareaindex filename
 !  
 !  The arguments are: 
 !  \begin{description}
-!  \item[name] name of the SYNT lai filename
-!  \item[ndir] name of the SYNT lai root directory
+!  \item[name] name of the SAT lai filename
+!  \item[ndir] name of the SAT lai root directory
 !  \item[yr]  current year
 !  \item[mo]  current month
 !  \item[da]  current day
@@ -291,7 +291,7 @@ subroutine SYNTlaiobs_filename(filename, ndir, yr, mo, da, hr)
   write(unit=fmo, fmt='(i2.2)') mo
   write(unit=fda, fmt='(i2.2)') da
   write(unit=fhr, fmt='(i2.2)') hr
-  filename =trim(ndir)//'/SYNT_LAI_'//trim(fyr)//trim(fmo)//trim(fda)//trim(fhr)//'.nc'
+  filename =trim(ndir)//'/SAT_LAI_'//trim(fyr)//trim(fmo)//trim(fda)//trim(fhr)//'.nc'
 
-end subroutine SYNTlaiobs_filename
+end subroutine SATlaiobs_filename
      
