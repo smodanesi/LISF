@@ -113,9 +113,9 @@ subroutine LIS_PEobs_plugin
    use SYNTsm_obsMod,     only : SYNTsm_obs_setup
 #endif
 
-!SM ADD SYNTHETIC LAI OBS
-#if ( defined PE_OBS_SYNTLAI )
-   use SYNTlai_obsMod,     only : SYNTlai_obs_setup
+!SM ADD SATELLITE LAI OBS
+#if ( defined PE_OBS_SATLAI )
+   use SATlai_obsMod,     only : SATlai_obs_setup
 #endif
 
 #if ( defined PE_OBS_UASNOW)
@@ -201,9 +201,9 @@ subroutine LIS_PEobs_plugin
    external read_SYNTsmobs, write_SYNTsmobs, reset_SYNTsmobs
 #endif
 
-!SM ADD SYNTHETIC LAI OBS
-#if ( defined PE_OBS_SYNTLAI )
-   external read_SYNTlaiobs, write_SYNTlaiobs, reset_SYNTlaiobs
+!SM ADD SATELLITE LAI OBS
+#if ( defined PE_OBS_SATLAI )
+   external read_SATlaiobs, write_SATlaiobs, reset_SATlaiobs
 #endif
 
 #if ( defined PE_OBS_UASNOW )
@@ -423,16 +423,16 @@ subroutine LIS_PEobs_plugin
                            reset_SYNTsmobs)
 #endif
 
-!SM add SYNT LAI
-#if ( defined PE_OBS_SYNTLAI )
-   call registerpeobssetup(trim(LIS_SYNTlaiobsId)//char(0), &
-                           SYNTlai_obs_setup)
-   call registergetpeobs(trim(LIS_SYNTlaiobsId)//char(0), &
-                         read_SYNTlaiobs)
-   call registerwritepeobs(trim(LIS_SYNTlaiobsId)//char(0), &
-                           write_SYNTlaiobs)
-   call registerpeobsreset(trim(LIS_SYNTlaiobsId)//char(0), &
-                           reset_SYNTlaiobs)
+!SM add SAT LAI
+#if ( defined PE_OBS_SATLAI )
+   call registerpeobssetup(trim(LIS_SATlaiobsId)//char(0), &
+                           SATlai_obs_setup)
+   call registergetpeobs(trim(LIS_SATlaiobsId)//char(0), &
+                         read_SATlaiobs)
+   call registerwritepeobs(trim(LIS_SATlaiobsId)//char(0), &
+                           write_SATlaiobs)
+   call registerpeobsreset(trim(LIS_SATlaiobsId)//char(0), &
+                           reset_SATlaiobs)
 #endif
 
 
