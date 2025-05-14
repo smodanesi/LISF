@@ -32,7 +32,7 @@ module LIS_pluginIndices
 !  16 Aug 2016: Mahdi Navari, added PILDAS  
 !  28 Aug 2020: Sara Modanesi, added WCM in Radiative Transfer Models
 !  28 Jun 2024: Sara Modanesi, added new optimization sets
-!
+!  25 May 2024: Sara Modanesi, changed lai opt set from SYNT to SAT
 !EOP
   PRIVATE
    
@@ -354,7 +354,7 @@ module LIS_pluginIndices
    character*50, public,  parameter :: LIS_SMAPsmobsId = "SMAP sm"
    character*50, public,  parameter :: LIS_SYNTirrobsId = "SYNT irr" !SM
    character*50, public,  parameter :: LIS_SYNTsmobsId = "SYNT sm"   !SM
-   character*50, public,  parameter :: LIS_SYNTlaiobsId = "SYNT lai" !SM
+   character*50, public,  parameter :: LIS_SATlaiobsId = "SAT lai" !SM
    character*50, public,  parameter :: LIS_UAsnowobsId = "UA snow"
 !-------------------------------------------------------------------------
 ! Objective Function Evaluation Criteria
