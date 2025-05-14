@@ -9,16 +9,16 @@
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !BOP
 !
-! !MODULE: SYNTlai_obsMod
+! !MODULE: SATlai_obsMod
 ! 
 ! !DESCRIPTION:  This routine contains interfaces and subroutines to
-!   handle SYNTHETIC observations of leaf area index
+!   handle SATELLITE observations of leaf area index
 !
 !   
 ! !REVISION HISTORY: 
 ! 21 Jun 2023 Sara Modanesi;   Initial Specification 
-! 
-module SYNTlai_obsMod
+! 14 May 2025 Sara Modanesi; chenged specif. to SAT data instead of SYNT
+module SATlai_obsMod
 ! !USES: 
   use ESMF
 !EOP
@@ -28,13 +28,13 @@ module SYNTlai_obsMod
 !-----------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 !-----------------------------------------------------------------------------
-  public :: SYNTlai_obs_setup
+  public :: SATlai_obs_setup
 !-----------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------
-  PUBLIC :: SYNTlai_obs_struc
+  PUBLIC :: SATlai_obs_struc
 
-  type, public ::  SYNTlai_obs_data_dec
+  type, public ::  SATlai_obs_data_dec
 
      integer             :: laiField
      integer             :: nc,nr
@@ -42,18 +42,18 @@ module SYNTlai_obsMod
      real,    allocatable    :: laitime(:,:)
      logical                 :: startMode 
 
-  end type SYNTlai_obs_data_dec
+  end type SATlai_obs_data_dec
 
-  type(SYNTlai_obs_data_dec), allocatable :: SYNTlai_obs_struc(:)
+  type(SATlai_obs_data_dec), allocatable :: SATlai_obs_struc(:)
 
 contains
 !BOP
 ! 
-! !ROUTINE: SYNTlai_obs_setup
-! \label{SYNTlai_obs_setup}
+! !ROUTINE: SATlai_obs_setup
+! \label{SATlai_obs_setup}
 ! 
 ! !INTERFACE: 
-  subroutine SYNTlai_obs_setup(Obs_State)
+  subroutine SATlai_obs_setup(Obs_State)
 ! !USES: 
     use LIS_coreMod
     use LIS_logMod
@@ -88,9 +88,9 @@ contains
     integer                 :: status
 
 
-    allocate(SYNTlai_obs_struc(LIS_rc%nnest))
+    allocate(SATlai_obs_struc(LIS_rc%nnest))
 
-    write(LIS_logunit,*) '[INFO] Setting up SYNT lai data reader....'
+    write(LIS_logunit,*) '[INFO] Setting up SAT lai data reader....'
 
 !    call ESMF_ArraySpecSet(intarrspec,rank=1,typekind=ESMF_TYPEKIND_I4,&
 !         rc=status)
@@ -100,17 +100,17 @@ contains
          rc=status)
     call LIS_verify(status)
 
-    call ESMF_ConfigFindLabel(LIS_config,"SYNTHETIC leaf area index data directory:",&
+    call ESMF_ConfigFindLabel(LIS_config,"SATELLITE leaf area index data directory:",&
          rc=status)
 
     call ESMF_ConfigGetattribute(LIS_config,obsdir,&
             rc=status)
-    call LIS_verify(status,'SYNTHETIC leaf area index data directory: not defined')
+    call LIS_verify(status,'SATELLITE leaf area index data directory: not defined')
 
     do n=1,LIS_rc%nnest
 !       call ESMF_ConfigGetattribute(LIS_config,obsdir,&
 !            rc=status)
-!       call LIS_verify(status,'SYNT leaf area index data directory: not defined')
+!       call LIS_verify(status,'SAT leaf area index data directory: not defined')
        call ESMF_AttributeSet(Obs_State(n),"Data Directory",&
             obsdir, rc=status)
        call LIS_verify(status)
@@ -125,7 +125,7 @@ contains
        call LIS_verify(status)
     enddo   
  
-    write(LIS_logunit,*)'[INFO] read SYNTHETIC leaf area index data specifications'
+    write(LIS_logunit,*)'[INFO] read SATELLITE leaf area index data specifications'
 
 !----------------------------------------------------------------------------
 !   Create the array containers that will contain the observations. 
@@ -136,45 +136,45 @@ contains
 
        obsField = ESMF_FieldCreate(arrayspec=realarrspec, &
             grid=LIS_vecGrid(n), &
-            name="SYNT_lai", rc=status)
-       call LIS_verify(status, 'Error in ESMF_FieldCreate: SYNT_lai ')
+            name="SAT_lai", rc=status)
+       call LIS_verify(status, 'Error in ESMF_FieldCreate: SAT_lai ')
 
 
        call ESMF_StateAdd(Obs_State(n),(/obsField/),rc=status)
        call LIS_verify(status, 'Error in ESMF_StateAdd: obsField')
 
     enddo
-    write(LIS_logunit,*) '[INFO] created the States to hold the SYNTHETIC leaf area index data'
+    write(LIS_logunit,*) '[INFO] created the States to hold the SATELLITE leaf area index data'
     
 !-------------------------------------------------------------
-! set up the SYNTHETIC LAI domain %and interpolation weights. 
+! set up the SATELLITE LAI domain %and interpolation weights. 
 !-------------------------------------------------------------
 
     ! get nx ny dimensions
     ! 2015 01 01 as example file. If call file gives error stops run
-    call SYNTlaiobs_filename(filename,obsdir,&
+    call SATlaiobs_filename(filename,obsdir,&
                      2015,1,1,1)
     ios = nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
-    call LIS_verify(ios,'Error reading in SYNTHETIC lai data dimensions: Error opening file'// filename)
+    call LIS_verify(ios,'Error reading in SATELLITE lai data dimensions: Error opening file'// filename)
     ios = nf90_inquire_dimension(ncid,1,yname,NY)
     ios = nf90_inquire_dimension(ncid,2,xname,NX)
     ios = nf90_close(ncid)
 
     do n=1,LIS_rc%nnest
-       SYNTlai_obs_struc(n)%nc = NX
-       SYNTlai_obs_struc(n)%nr = NY
+       SATlai_obs_struc(n)%nc = NX
+       SATlai_obs_struc(n)%nr = NY
 
-       allocate(SYNTlai_obs_struc(n)%laiobs(LIS_rc%lnc(n),LIS_rc%lnr(n)))
-       allocate(SYNTlai_obs_struc(n)%laitime(&
+       allocate(SATlai_obs_struc(n)%laiobs(LIS_rc%lnc(n),LIS_rc%lnr(n)))
+       allocate(SATlai_obs_struc(n)%laitime(&
             LIS_rc%lnc(n), LIS_rc%lnr(n)))
-       SYNTlai_obs_struc(n)%laiobs = LIS_rc%udef
-       SYNTlai_obs_struc(n)%laitime = -1 !check
+       SATlai_obs_struc(n)%laiobs = LIS_rc%udef
+       SATlai_obs_struc(n)%laitime = -1 !check
 
-       call LIS_registerAlarm("SYNT lai read alarm",&
+       call LIS_registerAlarm("SAT lai read alarm",&
             3600.0, 3600.0) !check
 
-       SYNTlai_obs_struc(n)%startMode = .true.
+       SATlai_obs_struc(n)%startMode = .true.
     enddo
-  end subroutine SYNTlai_obs_setup
+  end subroutine SATlai_obs_setup
   
-end module SYNTlai_obsMod
+end module SATlai_obsMod
