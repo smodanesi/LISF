@@ -8,14 +8,14 @@
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !BOP
-! !ROUTINE: write_SYNTlaiobs
-! \label{write_SYNTlaiobs}
+! !ROUTINE: write_SATlaiobs
+! \label{write_SATlaiobs}
 !
 ! !REVISION HISTORY:
 !  21 June 2023: Sara Modanesi; Initial Specification
-!
+!  14 May  2025: Sara Modanesi; changed specifications to write SATELLITE lai
 ! !INTERFACE: 
-subroutine write_SYNTlaiobs(Obj_Space)
+subroutine write_SATlaiobs(Obj_Space)
 ! !USES: 
   use ESMF
   use LIS_coreMod
@@ -29,7 +29,7 @@ subroutine write_SYNTlaiobs(Obj_Space)
 !
 ! !DESCRIPTION:
 !  
-!  write the synthetic leaf area index data to disk
+!  write the satellite leaf area index data to disk
 !  
 !  The arguments are: 
 !  \begin{description}
@@ -54,7 +54,7 @@ subroutine write_SYNTlaiobs(Obj_Space)
 
   if(data_update) then 
      
-     call ESMF_StateGet(Obj_Space,"SYNT_lai",laiField,&
+     call ESMF_StateGet(Obj_Space,"SAT_lai",laiField,&
           rc=status)
      call LIS_verify(status)
 
@@ -63,7 +63,7 @@ subroutine write_SYNTlaiobs(Obj_Space)
 
      if(LIS_masterproc) then 
         ftn = LIS_getNextUnitNumber()
-        call SYNTlai_obsname('LISPEOBS',obsname)
+        call SATlai_obsname('LISPEOBS',obsname)
 
         call LIS_create_output_directory('PEOBS') 
         open(ftn,file=trim(obsname), form='unformatted')
@@ -77,15 +77,15 @@ subroutine write_SYNTlaiobs(Obj_Space)
 
   endif
 
-end subroutine write_SYNTlaiobs
+end subroutine write_SATlaiobs
 
 !BOP
 ! 
-! !ROUTINE: SYNTlai_obsname
-! \label{SYNTlai_obsname}
+! !ROUTINE: SATlai_obsname
+! \label{SATlai_obsname}
 ! 
 ! !INTERFACE: 
-subroutine SYNTlai_obsname(variabname, obsname)
+subroutine SATlai_obsname(variabname, obsname)
 ! !USES: 
   use LIS_coreMod, only : LIS_rc
 
@@ -95,7 +95,7 @@ subroutine SYNTlai_obsname(variabname, obsname)
 ! 
 ! !DESCRIPTION: 
 !  This method generates a timestamped filename for the processed
-!  Synthetc LAI observations. 
+!  Satellite LAI observations. 
 ! 
 !EOP
 
@@ -107,7 +107,7 @@ subroutine SYNTlai_obsname(variabname, obsname)
 
   obsname = trim(LIS_rc%odir)//'/PEOBS/'//cdate1(1:6)//'/'//&
        trim(variabname)//'_'//cdate1//'.1gs4r'  
-end subroutine SYNTlai_obsname
+end subroutine SATlai_obsname
 
 
 
