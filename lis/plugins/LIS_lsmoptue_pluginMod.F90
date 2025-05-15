@@ -20,7 +20,7 @@ module LIS_lsmoptue_pluginMod
 !
 ! !REVISION HISTORY:
 !  16 Jul 09    Sujay Kumar  Initial Specification
-!  25 May 2025; Sara Modanesi: added spec for SYNT SM, IRR and SAT LAI
+!  15 May 2025; Sara Modanesi: added spec for SYNT SM, IRR and SAT LAI
   implicit none
 
   PRIVATE
@@ -146,6 +146,9 @@ subroutine LIS_lsmoptue_plugin
 
    external NoahMP401_getpeobspred_UAsnowobs
    external NoahMP401_setupobspred_UAsnowobs
+
+   external NoahMP401_getpeobspred_SATlaiobs
+   external NoahMP401_setupobspred_SATlaiobs
 
 #endif
 
@@ -341,6 +344,14 @@ subroutine LIS_lsmoptue_plugin
    call registerlsmpegetobspred(trim(LIS_noahmp401Id)//"+"//      &
                                 trim(LIS_UAsnowobsId)//char(0), &
                                 NoahMP401_getpeobspred_UAsnowobs)
+   call registerlsmpesetupobspred(trim(LIS_noahmp401Id)//"+"//      &
+                                  trim(LIS_SATlaiobsId)//char(0), &
+                                  NoahMP401_setupobspred_SATlaiobs)
+   call registerlsmpegetobspred(trim(LIS_noahmp401Id)//"+"//      &
+                                trim(LIS_SATlaiobsId)//char(0), &
+                                NoahMP401_getpeobspred_SATlaiobs)
+
+
 #endif
 #endif
 end subroutine LIS_lsmoptue_plugin
